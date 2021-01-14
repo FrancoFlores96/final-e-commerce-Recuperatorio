@@ -30,31 +30,21 @@ module.exports = {
     },
 
     buscar: function (req,res) {
-        let busqueda = req.query.busqueda;
-        db.Producto.findAll({
-            where:
-                {
-                    [op.or]: [
-                            {
-                                nombre: {
-                                    [op.like]: `%${busqueda}%`
-                                }
-                            },
-                            {
-                                marca: {
-                                [op.like]: `%${busqueda}%`
-
-                                }
-                            }
-                   ]
-
-                }
+       let busqueda = req.query.busqueda;
+       db.Producto.findAll({
+           where:{
+           [op.or]:[
+               {nombre:{[op.substring]:busqueda}
+            },
             
-        })
-        .then(function (resultados) {
-            res.render('resultadoBusqueda', { title: busqueda , resultados: resultados});
-        })
-    },
+               {marca:{[op.substring]:busqueda}
+             }
+            ]
+           }
+       }).then(function(resultados){
+           res.render('resultadoBusqueda',{resultados})
+       })
+       },
 
     agregarComentario: function (req,res) {
         if (req.session.usuarioLogueado == undefined) {
@@ -88,13 +78,17 @@ module.exports = {
         db.Producto.create({
             nombre: req.body.nombre,
             marca: req.body.marca,
-            precio: req.body.precio,
-            categoria_id: req.body.categoria,
-            img_url: req.body.imagen
+            img_url:req.body.imagen,
+            precio:req.body.precio,
+            categoria_id:req.body.categoria,
+            usuario_id: req.session.usuarioLogueado.id
+
         })
-        .then(function (resultado) {
-            res.redirect('/productos/detalle/'+ resultado.id)
+
+        .then(function(){
+            res.redirect('/productos/misProductos');
         })
+       
 
     },
 
